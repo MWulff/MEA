@@ -181,7 +181,48 @@
   <button id="dev-reset">Reset (dev)</button>
 
   <script>
-    // JS goes here in Task 2+
+    // ── Reward data ──────────────────────────────────────────────
+    const REWARDS = [
+      { id: '2x_news',   label: '2× points – next 3 News',    desc: 'Your next 3 news articles earn double points',             asset: 'Assets/graphic/news.png' },
+      { id: '2x_video',  label: '2× points – next 3 Videos',  desc: 'Your next 3 rewarded videos earn double points',           asset: 'Assets/graphic/video.png' },
+      { id: '2x_music',  label: '2× points – next 3 Songs',   desc: 'Your next 3 songs earn double points',                     asset: 'Assets/graphic/music.png' },
+      { id: '100_points',label: '+100 points',                 desc: '100 bonus points added to your balance',                   asset: 'Assets/graphic/points.png' },
+      { id: '2x_vip',    label: '2× points – next action',    desc: 'Your next eligible earning action earns double points',    asset: 'Assets/graphic/pointsvip.png' },
+    ];
+
+    const STORAGE_KEY = 'mea_daily_reward';
+
+    function todayStr() {
+      return new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD local
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return null;
+        const data = JSON.parse(raw);
+        if (data.date !== todayStr()) {
+          localStorage.removeItem(STORAGE_KEY);
+          return null;
+        }
+        return data; // { date, rewardId, status: 'spun'|'used' }
+      } catch {
+        localStorage.removeItem(STORAGE_KEY);
+        return null;
+      }
+    }
+
+    function saveState(rewardId, status) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        date: todayStr(),
+        rewardId,
+        status,
+      }));
+    }
+
+    function getReward(id) {
+      return REWARDS.find(r => r.id === id) || null;
+    }
   </script>
 
 </body>
