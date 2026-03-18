@@ -342,6 +342,59 @@
 
       requestAnimationFrame(frame);
     }
+
+    // ── State ────────────────────────────────────────────────────
+    const STATE = { READY: 'ready', SPINNING: 'spinning', CLAIMED: 'claimed', USED: 'used' };
+    let appState = STATE.READY;
+
+    const spinBtn       = document.getElementById('spin-btn');
+    const rewardClaimed = document.getElementById('reward-claimed');
+    const claimedIcon   = document.getElementById('claimed-icon');
+    const claimedLabel  = document.getElementById('claimed-label');
+    const modalOverlay  = document.getElementById('modal-overlay');
+    const modalIcon     = document.getElementById('modal-icon');
+    const modalTitle    = document.getElementById('modal-title');
+    const modalDesc     = document.getElementById('modal-desc');
+    const modalClaimBtn = document.getElementById('modal-claim-btn');
+    const devReset      = document.getElementById('dev-reset');
+
+    function render(state, reward) {
+      appState = state;
+
+      // Spin button
+      if (state === STATE.READY) {
+        spinBtn.textContent = 'TAP TO SPIN';
+        spinBtn.disabled = false;
+      } else if (state === STATE.SPINNING) {
+        spinBtn.textContent = 'TAP TO SPIN';
+        spinBtn.disabled = true;
+      } else {
+        spinBtn.textContent = 'Come back tomorrow';
+        spinBtn.disabled = true;
+      }
+
+      // Claimed reward strip (USED only — not shown during CLAIMED/modal state)
+      if (state === STATE.USED && reward) {
+        rewardClaimed.style.display = 'flex';
+        claimedIcon.src = reward.asset;
+        claimedIcon.alt = reward.label;
+        claimedLabel.textContent = reward.label;
+      } else {
+        rewardClaimed.style.display = 'none';
+      }
+
+      // Dev reset visibility
+      devReset.style.display = state === STATE.SPINNING ? 'none' : '';
+
+      // Resize handler (no-op during SPINNING)
+      window._spinningState = state === STATE.SPINNING;
+    }
+
+    window.addEventListener('resize', () => {
+      if (window._spinningState) return;
+      setCanvasSize();
+      drawWheel(wheelRotation);
+    });
   </script>
 
 </body>
