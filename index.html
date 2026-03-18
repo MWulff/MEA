@@ -427,6 +427,45 @@
         onDone();
       }, 200);
     }
+
+    // ── Event handlers ───────────────────────────────────────────
+    spinBtn.addEventListener('click', () => {
+      if (appState !== STATE.READY) return;
+
+      // Pre-determine reward
+      const segmentIndex = Math.floor(Math.random() * REWARDS.length);
+      const reward = REWARDS[segmentIndex];
+
+      // Persist immediately (before animation)
+      saveState(reward.id, 'spun');
+      render(STATE.SPINNING, null);
+
+      spinTo(segmentIndex, () => {
+        // Wheel stopped — transition to CLAIMED (in-memory only)
+        render(STATE.CLAIMED, reward);
+        setTimeout(() => showModal(reward), 300);
+      });
+    });
+
+    modalClaimBtn.addEventListener('click', () => {
+      const stored = loadState();
+      if (!stored) return;
+
+      // Render USED underneath (visible through fading overlay)
+      const reward = getReward(stored.rewardId);
+      render(STATE.USED, reward);
+
+      // Update localStorage
+      saveState(stored.rewardId, 'used');
+
+      // Fade out and remove modal
+      hideModal(() => {});
+    });
+
+    devReset.addEventListener('click', () => {
+      localStorage.removeItem(STORAGE_KEY);
+      location.reload();
+    });
   </script>
 
 </body>
