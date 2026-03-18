@@ -91,10 +91,13 @@
       align-items: center;
       justify-content: center;
       z-index: 100;
+      opacity: 0;
+      transition: opacity 200ms ease;
     }
 
     #modal-overlay.visible {
       display: flex;
+      opacity: 1;
     }
 
     #modal-card {
@@ -398,6 +401,32 @@
       setCanvasSize();
       drawWheel(wheelRotation);
     });
+
+    // ── Modal ────────────────────────────────────────────────────
+    function showModal(reward) {
+      modalIcon.src = reward.asset;
+      modalIcon.alt = reward.label;
+      modalTitle.textContent = reward.label;
+      modalDesc.textContent = reward.desc;
+
+      modalOverlay.style.opacity = '0';
+      modalOverlay.style.transition = 'none';
+      modalOverlay.classList.add('visible');
+
+      // Force reflow before transition
+      modalOverlay.getBoundingClientRect();
+      modalOverlay.style.transition = 'opacity 200ms ease';
+      modalOverlay.style.opacity = '1';
+    }
+
+    function hideModal(onDone) {
+      modalOverlay.style.transition = 'opacity 200ms ease';
+      modalOverlay.style.opacity = '0';
+      setTimeout(() => {
+        modalOverlay.remove();
+        onDone();
+      }, 200);
+    }
   </script>
 
 </body>
