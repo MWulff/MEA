@@ -223,6 +223,90 @@
     function getReward(id) {
       return REWARDS.find(r => r.id === id) || null;
     }
+
+    // ── Canvas setup ─────────────────────────────────────────────
+    const canvas = document.getElementById('wheel-canvas');
+    const ctx = canvas.getContext('2d');
+
+    const SEG_COLOURS = ['#3d1f6e', '#2d1b4e', '#3d1f6e', '#2d1b4e', '#3d1f6e']; // even/odd alternation
+    const SEG_COUNT = REWARDS.length; // 5
+    const SEG_ANGLE = (2 * Math.PI) / SEG_COUNT; // 72° in radians
+
+    let wheelRotation = 0; // cumulative degrees, never reset except on page reload
+
+    // Preload reward images
+    const rewardImages = REWARDS.map(r => {
+      const img = new Image();
+      img.src = r.asset;
+      return img;
+    });
+
+    function setCanvasSize() {
+      const size = Math.min(window.innerWidth * 0.8, 320);
+      canvas.width = size;
+      canvas.height = size;
+    }
+
+    function drawWheel(rotationDeg) {
+      const size = canvas.width;
+      const cx = size / 2;
+      const cy = size / 2;
+      const radius = size / 2 - 4; // small inset so edge isn't clipped
+      const rotRad = (rotationDeg * Math.PI) / 180;
+
+      ctx.clearRect(0, 0, size, size);
+
+      for (let i = 0; i < SEG_COUNT; i++) {
+        const startAngle = rotRad + i * SEG_ANGLE - Math.PI / 2;
+        const endAngle = startAngle + SEG_ANGLE;
+        const midAngle = startAngle + SEG_ANGLE / 2;
+
+        // Segment fill
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, radius, startAngle, endAngle);
+        ctx.closePath();
+        ctx.fillStyle = SEG_COLOURS[i];
+        ctx.fill();
+
+        // Segment border
+        ctx.strokeStyle = '#1a0a2e';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Icon
+        const iconDist = radius * 0.6;
+        const iconX = cx + Math.cos(midAngle) * iconDist;
+        const iconY = cy + Math.sin(midAngle) * iconDist;
+        const iconSize = 36;
+        const img = rewardImages[i];
+        if (img.complete && img.naturalWidth > 0) {
+          ctx.drawImage(img, iconX - iconSize / 2, iconY - iconSize / 2, iconSize, iconSize);
+        }
+
+        // Label
+        ctx.save();
+        ctx.translate(iconX + Math.cos(midAngle) * radius * 0.22, iconY + Math.sin(midAngle) * radius * 0.22);
+        ctx.rotate(midAngle + Math.PI / 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '11px -apple-system, BlinkMacSystemFont, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillText(REWARDS[i].label, 0, 0);
+        ctx.restore();
+      }
+
+      // Outer ring
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, 0, 2 * Math.PI);
+      ctx.strokeStyle = '#ff0080';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    }
+
+    // ── Initial render ────────────────────────────────────────────
+    setCanvasSize();
+    drawWheel(wheelRotation);
   </script>
 
 </body>
