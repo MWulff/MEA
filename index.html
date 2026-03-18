@@ -287,7 +287,10 @@
         // Label
         ctx.save();
         ctx.translate(iconX + Math.cos(midAngle) * radius * 0.22, iconY + Math.sin(midAngle) * radius * 0.22);
-        ctx.rotate(midAngle + Math.PI / 2);
+        // Flip text so it always reads outward (never upside-down)
+        const normalizedMid = ((midAngle % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+        const flip = normalizedMid > Math.PI / 2 && normalizedMid < 3 * Math.PI / 2 ? Math.PI : 0;
+        ctx.rotate(midAngle + Math.PI / 2 + flip);
         ctx.fillStyle = '#ffffff';
         ctx.font = '11px -apple-system, BlinkMacSystemFont, sans-serif';
         ctx.textAlign = 'center';
