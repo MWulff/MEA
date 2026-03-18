@@ -307,6 +307,41 @@
     // ── Initial render ────────────────────────────────────────────
     setCanvasSize();
     drawWheel(wheelRotation);
+
+    // ── Animation ────────────────────────────────────────────────
+    function easeOut(t) {
+      return 1 - Math.pow(1 - t, 3);
+    }
+
+    function spinTo(segmentIndex, onStop) {
+      const DURATION = 3000;
+      const startTime = performance.now();
+      const startRotation = wheelRotation;
+
+      const segmentCentreAngle = (segmentIndex * 72) + 36; // degrees, clockwise from top
+      const currentRotation = wheelRotation % 360;
+      const offset = (360 - currentRotation - segmentCentreAngle + 360) % 360;
+      const totalRotation = wheelRotation + 1800 + offset;
+
+      function frame(now) {
+        const elapsed = now - startTime;
+        const t = Math.min(elapsed / DURATION, 1);
+        const progress = easeOut(t);
+        const currentAngle = startRotation + (totalRotation - startRotation) * progress;
+
+        drawWheel(currentAngle);
+
+        if (t < 1) {
+          requestAnimationFrame(frame);
+        } else {
+          wheelRotation = totalRotation;
+          drawWheel(wheelRotation);
+          onStop();
+        }
+      }
+
+      requestAnimationFrame(frame);
+    }
   </script>
 
 </body>
