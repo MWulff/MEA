@@ -310,10 +310,6 @@
       ctx.stroke();
     }
 
-    // ── Initial render ────────────────────────────────────────────
-    setCanvasSize();
-    drawWheel(wheelRotation);
-
     // ── Animation ────────────────────────────────────────────────
     function easeOut(t) {
       return 1 - Math.pow(1 - t, 3);
@@ -466,6 +462,32 @@
       localStorage.removeItem(STORAGE_KEY);
       location.reload();
     });
+
+    // ── Init ─────────────────────────────────────────────────────
+    function init() {
+      setCanvasSize();
+
+      const stored = loadState();
+
+      if (!stored) {
+        drawWheel(wheelRotation);
+        render(STATE.READY, null);
+        return;
+      }
+
+      // Both 'spun' and 'used' → USED state (modal skipped on reload)
+      const reward = stored.rewardId ? getReward(stored.rewardId) : null;
+      drawWheel(wheelRotation);
+      render(STATE.USED, reward || null);
+
+      if (!reward) {
+        // Unknown rewardId fallback
+        claimedLabel.textContent = 'Reward claimed';
+        rewardClaimed.style.display = 'flex';
+      }
+    }
+
+    init();
   </script>
 
 </body>
