@@ -241,6 +241,12 @@
     const rewardImages = REWARDS.map(r => {
       const img = new Image();
       img.src = r.asset;
+      img.onload = () => {
+        // Redraw after each image loads (only during non-spinning states)
+        if (!window._spinningState) {
+          drawWheel(wheelRotation);
+        }
+      };
       return img;
     });
 
